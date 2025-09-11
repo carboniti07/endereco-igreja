@@ -14,7 +14,7 @@ html, body {
   min-height: 100vh;
   width: 100%;
 
-  background: url("/fundo.jpeg") no-repeat center center fixed;
+background-image: url(fundo.jpeg);
   background-size: cover;
   padding: 20px;
   box-sizing: border-box;
