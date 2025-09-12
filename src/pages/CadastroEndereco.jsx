@@ -3,12 +3,6 @@ import axios from "axios";
 import "./CadastroEndereco.css";
 import Select from "react-select";
 
-// 🔗 URLs dos backends (Render) com fallback para variáveis de ambiente do Vite/Netlify
-const CENSO_API =
-  import.meta?.env?.VITE_CENSO_API || "https://backend-censo-p8hr.onrender.com";
-const ENDERECO_API =
-  import.meta?.env?.VITE_ENDERECO_API || "https://backend-endereco.onrender.com";
-
 export default function CadastroEndereco() {
   const [login, setLogin] = useState("");
   const [membro, setMembro] = useState(null);
@@ -96,16 +90,15 @@ export default function CadastroEndereco() {
     label: c,
   }));
 
-  // Validar login (CPF ou matrícula) no backend do Censo (Render)
+  // Validar login (CPF ou matrícula)
   const verificarLogin = async () => {
     try {
       const valor = login.trim();
       const res = await axios.get(
-        `${CENSO_API}/membro/${valor}/verificar`
+        `http://localhost:5000/membro/${valor}/verificar`
       );
       setMembro(res.data);
-    } catch (err) {
-      console.error("Erro ao verificar login:", err);
+    } catch {
       alert("❌ CPF ou Matrícula não encontrado.");
     }
   };
@@ -185,19 +178,21 @@ export default function CadastroEndereco() {
     endereco.cidade &&
     endereco.estado;
 
-  // Salvar no backend de endereços (Render)
-  const salvarEndereco = async () => {
-    try {
-      await axios.post(`${ENDERECO_API}/enderecos`, {
-        matricula: membro.matricula,
-        endereco,
-      });
-      alert("✅ Endereço salvo separadamente!");
-    } catch (err) {
-      console.error("Erro ao salvar endereço:", err);
-      alert("❌ Erro ao salvar endereço.");
-    }
-  };
+  
+ // Salvar no backend de endereços (porta 5001)
+const salvarEndereco = async () => {
+  try {
+    await axios.post("http://localhost:5001/enderecos", {
+      matricula: membro.matricula,
+      endereco
+    });
+    alert("✅ Endereço salvo separadamente!");
+  } catch (err) {
+    console.error("Erro ao salvar endereço:", err);
+    alert("❌ Erro ao salvar endereço.");
+  }
+};
+
 
   // Estilo dos selects igual aos inputs
   const selectStyles = {
@@ -300,38 +295,31 @@ export default function CadastroEndereco() {
               onChange={handleChange}
             />
 
-            {/* Estado */}
-            <Select
-              classNamePrefix="rs"
-              styles={selectStyles}
-              placeholder="Selecione o Estado"
-              options={estadosOptions}
-              value={
-                endereco.estado
-                  ? { value: endereco.estado, label: endereco.estado }
-                  : null
-              }
-              onChange={handleSelectEstado}
-              isSearchable={false}
-              isClearable={false}
-            />
+           {/* Estado */}
+<Select
+  classNamePrefix="rs"
+  styles={selectStyles}
+  placeholder="Selecione o Estado"
+  options={estadosOptions}
+  value={endereco.estado ? { value: endereco.estado, label: endereco.estado } : null}
+  onChange={handleSelectEstado}
+  isSearchable={false}
+  isClearable={false}
+/>
 
-            {/* Cidade */}
-            <Select
-              classNamePrefix="rs"
-              styles={selectStyles}
-              placeholder="Selecione a Cidade"
-              options={cidadesOptions}
-              value={
-                endereco.cidade
-                  ? { value: endereco.cidade, label: endereco.cidade }
-                  : null
-              }
-              onChange={handleSelectCidade}
-              isDisabled={!endereco.estado}
-              isSearchable={false}
-              isClearable={false}
-            />
+{/* Cidade */}
+<Select
+  classNamePrefix="rs"
+  styles={selectStyles}
+  placeholder="Selecione a Cidade"
+  options={cidadesOptions}
+  value={endereco.cidade ? { value: endereco.cidade, label: endereco.cidade } : null}
+  onChange={handleSelectCidade}
+  isDisabled={!endereco.estado}
+  isSearchable={false}
+  isClearable={false}
+/>
+
 
             <button
               onClick={salvarEndereco}
