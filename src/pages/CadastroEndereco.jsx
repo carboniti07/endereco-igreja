@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "./CadastroEndereco.css";
 import Select from "react-select";
@@ -21,6 +21,10 @@ export default function CadastroEndereco() {
     cidade: "",
     estado: "",
   });
+
+  // ⬇️ NOVOS estados
+  const [jaSalvou, setJaSalvou] = useState(false);
+  const [mensagem, setMensagem] = useState("");
 
   // Lista de estados e cidades (expandida)
   const estados = {
@@ -96,14 +100,23 @@ export default function CadastroEndereco() {
     label: c,
   }));
 
+  // Quando o membro muda, verifica se já há registro salvo (persistido)
+  useEffect(() => {
+    if (membro?.matricula) {
+      const chave = `endereco_salvo_${membro.matricula}`;
+      setJaSalvou(localStorage.getItem(chave) === "true");
+    } else {
+      setJaSalvou(false);
+    }
+  }, [membro]);
+
   // Validar login (CPF ou matrícula) no backend do Censo (Render)
   const verificarLogin = async () => {
     try {
       const valor = login.trim();
-      const res = await axios.get(
-        `${CENSO_API}/membro/${valor}/verificar`
-      );
+      const res = await axios.get(`${CENSO_API}/membro/${valor}/verificar`);
       setMembro(res.data);
+      setMensagem(""); // limpa mensagem ao entrar
     } catch (err) {
       console.error("Erro ao verificar login:", err);
       alert("❌ CPF ou Matrícula não encontrado.");
@@ -187,15 +200,25 @@ export default function CadastroEndereco() {
 
   // Salvar no backend de endereços (Render)
   const salvarEndereco = async () => {
+    // impede múltiplos salvamentos
+    if (jaSalvou) {
+      setMensagem("✅ Endereço já foi salvo. Não é possível salvar novamente.");
+      return;
+    }
+
     try {
       await axios.post(`${ENDERECO_API}/enderecos`, {
         matricula: membro.matricula,
         endereco,
       });
-      alert("✅ Endereço salvo separadamente!");
+
+      // Marca sucesso, trava e persiste a trava
+      setJaSalvou(true);
+      setMensagem("✅ Endereço salvo com sucesso!");
+      localStorage.setItem(`endereco_salvo_${membro.matricula}`, "true");
     } catch (err) {
       console.error("Erro ao salvar endereço:", err);
-      alert("❌ Erro ao salvar endereço.");
+      setMensagem("❌ Erro ao salvar endereço. Tente novamente.");
     }
   };
 
@@ -255,6 +278,24 @@ export default function CadastroEndereco() {
 
             <h2>Cadastro de Endereço</h2>
 
+            {/* Mensagens */}
+            {mensagem && (
+              <div
+                className="alerta"
+                style={{
+                  background: mensagem.startsWith("✅") ? "#e9f7ef" : "#fdecea",
+                  color: mensagem.startsWith("✅") ? "#1e7e34" : "#b02a37",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  padding: "12px 16px",
+                  borderRadius: "10px",
+                  marginBottom: "12px",
+                  fontSize: "14px",
+                }}
+              >
+                {mensagem}
+              </div>
+            )}
+
             {/* CEP */}
             <input
               type="text"
@@ -262,6 +303,7 @@ export default function CadastroEndereco() {
               placeholder="CEP"
               value={endereco.cep}
               onChange={handleChange}
+              disabled={jaSalvou}
             />
 
             {/* Logradouro */}
@@ -271,6 +313,7 @@ export default function CadastroEndereco() {
               placeholder="Logradouro"
               value={endereco.logradouro}
               onChange={handleChange}
+              disabled={jaSalvou}
             />
 
             {/* Número */}
@@ -280,6 +323,7 @@ export default function CadastroEndereco() {
               placeholder="Número"
               value={endereco.numero}
               onChange={handleChange}
+              disabled={jaSalvou}
             />
 
             {/* Complemento (opcional) */}
@@ -289,6 +333,7 @@ export default function CadastroEndereco() {
               placeholder="Complemento"
               value={endereco.complemento}
               onChange={handleChange}
+              disabled={jaSalvou}
             />
 
             {/* Bairro */}
@@ -298,6 +343,7 @@ export default function CadastroEndereco() {
               placeholder="Bairro"
               value={endereco.bairro}
               onChange={handleChange}
+              disabled={jaSalvou}
             />
 
             {/* Estado */}
@@ -314,6 +360,7 @@ export default function CadastroEndereco() {
               onChange={handleSelectEstado}
               isSearchable={false}
               isClearable={false}
+              isDisabled={jaSalvou}
             />
 
             {/* Cidade */}
@@ -328,17 +375,17 @@ export default function CadastroEndereco() {
                   : null
               }
               onChange={handleSelectCidade}
-              isDisabled={!endereco.estado}
+              isDisabled={!endereco.estado || jaSalvou}
               isSearchable={false}
               isClearable={false}
             />
 
             <button
               onClick={salvarEndereco}
-              disabled={!enderecoCompleto}
-              className={!enderecoCompleto ? "disabled" : ""}
+              disabled={!enderecoCompleto || jaSalvou}
+              className={!enderecoCompleto || jaSalvou ? "disabled" : ""}
             >
-              Salvar Endereço
+              {jaSalvou ? "Endereço já salvo" : "Salvar Endereço"}
             </button>
           </>
         )}
