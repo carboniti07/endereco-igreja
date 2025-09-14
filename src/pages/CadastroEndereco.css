@@ -1,10 +1,11 @@
 /* Reset */
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
   font-family: "Poppins", sans-serif;
-  background-image: url(fundo.jpeg);
+  background: url('/fundo.jpeg') no-repeat center center fixed;
   background-size: cover;
 }
 
@@ -47,7 +48,8 @@ h2 {
 input {
   width: 100%;
   padding: 16px 18px;
-  margin-bottom: 22px; /* mais espaço entre inputs */
+  margin-bottom: 22px;
+  /* mais espaço entre inputs */
   border: 1px solid #d0d0d0;
   border-radius: 12px;
   font-size: 16px;
@@ -108,6 +110,7 @@ button:hover {
     padding: 14px;
   }
 }
+
 /* react-select igual ao input */
 .rs__control {
   width: 100%;
@@ -127,7 +130,8 @@ button:hover {
 }
 
 .rs__value-container {
-  padding: 0 18px !important;   /* padding igual ao input */
+  padding: 0 18px !important;
+  /* padding igual ao input */
 }
 
 .rs__placeholder {
@@ -142,7 +146,8 @@ button:hover {
 }
 
 .rs__indicators {
-  padding-right: 12px !important; /* seta alinhada */
+  padding-right: 12px !important;
+  /* seta alinhada */
 }
 
 .rs__indicator-separator {
@@ -168,6 +173,7 @@ button:hover {
 .rs__option--is-focused {
   background-color: rgba(0, 123, 255, 0.08) !important;
 }
+
 button:disabled,
 button.disabled {
   background: #ccc;
@@ -175,6 +181,7 @@ button.disabled {
   transform: none;
   opacity: 0.7;
 }
+
 .membro-perfil {
   display: flex;
   flex-direction: column;
@@ -190,7 +197,8 @@ button.disabled {
 .membro-atividade,
 .membro-nome,
 .membro-congregacao {
-  font-weight: 600; /* todos em negrito */
+  font-weight: 600;
+  /* todos em negrito */
   margin: 0;
   text-align: center;
 }
@@ -209,4 +217,3 @@ button.disabled {
   font-size: 14px;
   color: #444;
 }
-
